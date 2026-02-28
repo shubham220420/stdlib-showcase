@@ -11,13 +11,15 @@ An interactive visualization comparing double-precision `cosh` and single-precis
 Computes the hyperbolic cosine of a number using 64-bit IEEE 754 double-precision floating-point arithmetic.
 
 ```js
-import cosh from "@stdlib/math/base/special/cosh";
+var uniform = require( '@stdlib/random/array/uniform' );
+var logEachMap = require( '@stdlib/console/log-each-map' );
+var cosh = require( '@stdlib/math/base/special/cosh' );
 
-cosh( 0.0 )   // => 1.0
-cosh( 2.0 )   // => 3.7621956910213425
-cosh( -2.0 )  // => 3.7621956910213425
-cosh( Infinity )  // => Infinity
-cosh( NaN )   // => NaN
+var opts = {
+	'dtype': 'float64'
+};
+var x = uniform( 10, -5.0, 5.0, opts );
+logEachMap( 'cosh(%lf) = %lf', x, cosh );
 ```
 
 **Precision:** ~15–17 significant decimal digits.  
@@ -30,13 +32,16 @@ cosh( NaN )   // => NaN
 Computes the hyperbolic cosine of a number using 32-bit IEEE 754 single-precision floating-point arithmetic.
 
 ```js
-import coshf from "@stdlib/math/base/special/coshf";
+var uniform = require( '@stdlib/random/array/uniform' );
+var logEachMap = require( '@stdlib/console/log-each-map' );
+var coshf = require( '@stdlib/math/base/special/coshf' );
 
-coshf( 0.0 )   // => 1.0
-coshf( 2.0 )   // => 3.7621956 (float32 rounded)
-coshf( -2.0 )  // => 3.7621956
-coshf( Infinity )  // => Infinity
-coshf( NaN )   // => NaN
+var opts = {
+	'dtype': 'float32'
+};
+var x = uniform( 10, -5.0, 5.0, opts );
+
+logEachMap( 'coshf(%f) = %f', x, coshf );
 ```
 
 **Precision:** ~6–9 significant decimal digits.  
