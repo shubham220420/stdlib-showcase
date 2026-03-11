@@ -68,3 +68,22 @@ $$
 ---
 
 The visualizer lets you compare how early `coshf` overflows to `Infinity` compared to `cosh` — visible by raising the x-axis range past ±89.
+
+---
+
+## Repository Traffic Dashboard
+
+The site now includes a dedicated `stdlib Traffic` view for `stdlib-js/stdlib`.
+
+- **Contributors**: unique commit contributors active during the selected rolling window
+- **Pull requests**: PRs opened during the selected rolling window
+- **Issues**: issues opened during the selected rolling window
+- **Contributor details**: profile, company, location, followers, public repositories, commit totals, additions, deletions, and last active week
+
+The traffic view supports both preset windows (`1 week`, `1 month`, `3 months`, `6 months`) and a custom start/end date filter.
+
+The dashboard uses the public GitHub REST API directly in the browser. To reduce rate-limit problems, the app caches GitHub responses, reuses search results across views, and only fetches extended profile details for the top contributors in the current range. If you still hit unauthenticated rate limits during local development, add a GitHub token to your environment:
+
+```bash
+VITE_GITHUB_TOKEN=your_github_token
+```

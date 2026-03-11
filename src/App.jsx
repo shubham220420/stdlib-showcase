@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import Title from "./components/Title";
-import CoshPlotter from "./components/CoshPlotter";
+import Visualizer from "./components/Visualizer";
 
 function App() {
+  const [activeView, setActiveView] = useState("visualizer");
+
   return (
     <>
-      <Title />
-      <CoshPlotter />
+      <Title activeView={activeView} setActiveView={setActiveView} />
+      <Visualizer activeView={activeView} />
     </>
   );
 }
