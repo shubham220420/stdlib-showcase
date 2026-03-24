@@ -1,56 +1,14 @@
 import React, { useState } from "react";
 import Plot from "./Plot";
 import TrafficDashboard from "./TrafficDashboard";
-import Range from "./Range";
 import Slider from "./Slider";
+import CodeBlock from "./CodeBlock";
 import coshExampleRaw from "../examples/cosh.cjs?raw";
 import coshfExampleRaw from "../examples/coshf.cjs?raw";
-
-function stripLicense(raw) {
-  const idx = raw.indexOf("*/");
-  if (idx === -1) return raw.trim();
-  return raw.slice(idx + 2).replace(/^\n/, "").trim();
-}
-
-function highlight(line) {
-  const tokens = line.split(/('(?:[^'\\]|\\.)*'|\b(?:var|require|use strict)\b)/);
-  return tokens.map((tok, i) => {
-    if (/^'use strict'$/.test(tok)) return <span key={i} className="text-slate-500">{tok}</span>;
-    if (/^'@stdlib\//.test(tok) || /^\.\.\/lib'$/.test(tok)) return <span key={i} className="text-sky-300">{tok}</span>;
-    if (/^'.*'$/.test(tok)) return <span key={i} className="text-slate-300">{tok}</span>;
-    if (/^(var|require|use strict)$/.test(tok)) return <span key={i} className="text-cyan-300">{tok}</span>;
-    const withIdents = tok.replace(/(uniform|logEachMap|coshf|cosh|opts|x)(?=\s*[=(,;]|\()/g, (m) => `§WHITE§${m}§END§`);
-    if (withIdents !== tok) {
-      return withIdents.split(/(§WHITE§.*?§END§)/).map((part, j) => {
-        const m = part.match(/^§WHITE§(.*)§END§$/);
-        return m ? <span key={j} className="text-white">{m[1]}</span> : <span key={j} className="text-slate-300">{part}</span>;
-      });
-    }
-    if (/^[\d.]+$/.test(tok.trim()) || /^-[\d.]+$/.test(tok.trim())) return <span key={i} className="text-amber-200">{tok}</span>;
-    return <span key={i} className="text-slate-300">{tok}</span>;
-  });
-}
-
-const CodeBlock = ({ raw, accentColor, label }) => {
-  const code = stripLicense(raw);
-  const lines = code.split("\n");
-  const dot = accentColor === "orange" ? "bg-[#F59E0B]" : "bg-[#60A5FA]";
-  const name = accentColor === "orange" ? "text-[#FCD34D]" : "text-[#BFDBFE]";
-  return (
-    <div className="overflow-hidden rounded-xl border border-[#0F172A] bg-[#0F172A] shadow-[0_18px_40px_rgba(15,23,42,0.22)]">
-      <div className="flex items-center gap-2 border-b border-white/10 bg-[#111827] px-5 py-3">
-        <span className={`h-2 w-2 rounded-full ${dot}`} />
-        <span className={`${name} text-xs font-mono font-semibold`}>{label}</span>
-        <span className="ml-auto text-xs font-mono text-[#94A3B8]">examples/index.cjs</span>
-      </div>
-      <div className="bg-[#0B1120] px-5 py-4 text-xs font-mono leading-[1.9] text-[#E2E8F0]">
-        {lines.map((line, i) => (
-          <div key={i} className="whitespace-pre">{line === "" ? <span>&#8203;</span> : highlight(line)}</div>
-        ))}
-      </div>
-    </div>
-  );
-};
+import cosh from "../utils/cosh/index.js";
+import coshf from "../utils/coshf/index.js";
+import isFiniteNumber from "@stdlib/math/base/assert/is-finite";
+import abs from "@stdlib/math/base/special/abs";
 
 const FnToggle = ({ active, onToggle, label, color, precision }) => {
   const activeClass = color === "teal"
@@ -84,10 +42,35 @@ const InfoRow = ({ dot, text }) => (
 );
 
 function Visualizer({ activeView = "visualizer" }) {
-  const [xRange, setXRange] = useState([-5, 5]);
-  const [yMax, setYMax] = useState(80);
+  const [xValue, setXValue] = useState(0);
   const [showCosh, setShowCosh] = useState(true);
   const [showCoshf, setShowCoshf] = useState(true);
+  const yCosh = cosh(xValue);
+  const yCoshf = coshf(xValue);
+  const maxFiniteY = Math.max(
+    isFiniteNumber(yCosh) ? yCosh : 1,
+    isFiniteNumber(yCoshf) ? yCoshf : 1
+  );
+  const yMax = Math.max(10, maxFiniteY * 1.1);
+
+  const clampX = (v) => {
+    if (!isFiniteNumber(v)) return 0;
+    return Math.min(100, Math.max(0, parseFloat(v.toFixed(1))));
+  };
+
+  const handleXInputChange = (e) => {
+    const next = parseFloat(e.target.value);
+    setXValue(clampX(next));
+  };
+
+  const formatOutputValue = (value) => {
+    if (!isFiniteNumber(value)) return "NaN";
+    const absValue = abs(value);
+    if (absValue !== 0 && (absValue >= 1e6 || absValue < 1e-4)) {
+      return value.toExponential(4);
+    }
+    return value.toFixed(6);
+  };
 
   if (activeView === "traffic") {
     return (
@@ -155,7 +138,7 @@ function Visualizer({ activeView = "visualizer" }) {
                 <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#6C7378]">Plot</span>
                 <span className="text-[#6C7378]">•</span>
                 <span className="font-mono text-sm text-[#2C2E2F]">
-                  x ∈ [{xRange[0].toFixed(1)}, {xRange[1].toFixed(1)}]
+                  x = {xValue.toFixed(1)}
                 </span>
               </div>
               <div className="flex items-center gap-3">
@@ -179,7 +162,7 @@ function Visualizer({ activeView = "visualizer" }) {
               <Plot
                 yMin={0}
                 yMax={yMax}
-                xRange={xRange}
+                xValue={xValue}
                 showCosh={showCosh}
                 showCoshf={showCoshf}
               />
@@ -193,24 +176,48 @@ function Visualizer({ activeView = "visualizer" }) {
             <div className="space-y-6 rounded-xl border border-[#E0E0E0] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
               <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#6C7378]">Parameters</p>
 
-              <Range
-                xRange={xRange}
-                setXRange={setXRange}
-                min={-20}
-                max={20}
-                step={0.5}
+              <Slider
+                label="input x"
+                value={xValue}
+                setValue={setXValue}
+                min={0}
+                max={100}
+                step={0.1}
+                accentColor="orange"
               />
 
-              <div className="border-t border-[#E0E0E0] pt-5">
-                <Slider
-                  label="y-axis ceiling"
-                  value={yMax}
-                  setValue={setYMax}
-                  min={10}
-                  max={500}
-                  step={10}
-                  accentColor="teal"
+              <div className="space-y-2">
+                <label className="block text-[11px] font-medium uppercase tracking-[0.18em] text-[#6C7378]" htmlFor="x-value-input">
+                  x input box
+                </label>
+                <input
+                  id="x-value-input"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  value={xValue}
+                  onChange={handleXInputChange}
+                  className="w-full rounded-[10px] border border-[#D5DEE8] bg-white px-3 py-2 font-mono text-sm text-[#2C2E2F] outline-none focus:border-[#009CDE] focus:ring-2 focus:ring-[#BAE6FD]"
                 />
+              </div>
+
+              <div className="rounded-[10px] border border-[#E0E0E0] bg-[#F5F7FA] p-4">
+                <p className="mb-3 text-[10px] font-mono uppercase tracking-[0.16em] text-[#6C7378]">Function Output</p>
+                <div className="space-y-2 font-mono text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#6C7378]">x</span>
+                    <span className="max-w-[170px] break-all text-right text-[#2C2E2F]">{xValue.toFixed(1)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#1D4ED8]">cosh(x)</span>
+                    <span className="max-w-[170px] break-all text-right text-[#1D4ED8]">{formatOutputValue(yCosh)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#D97706]">coshf(x)</span>
+                    <span className="max-w-[170px] break-all text-right text-[#D97706]">{formatOutputValue(yCoshf)}</span>
+                  </div>
+                </div>
               </div>
             </div>
 

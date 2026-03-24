@@ -1,3 +1,5 @@
+import isNaNNumber from "@stdlib/math/base/assert/is-nan";
+
 const GITHUB_API_BASE = "https://api.github.com";
 const GITHUB_API_VERSION = "2022-11-28";
 const OWNER = "stdlib-js";
@@ -108,7 +110,7 @@ function getToday() {
 function parseDateInput(value, endOfDay = false) {
   const date = new Date(`${value}T${endOfDay ? "23:59:59.999" : "00:00:00.000"}Z`);
 
-  if (Number.isNaN(date.getTime())) {
+  if (isNaNNumber(date.getTime())) {
     throw new Error("Please provide a valid date range.");
   }
 

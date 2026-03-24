@@ -1,4 +1,5 @@
 import React from "react";
+import isInteger from "@stdlib/math/base/assert/is-integer";
 
 const Slider = ({ label, value, setValue, min, max, step, accentColor = "teal" }) => {
   const pct = ((value - min) / (max - min)) * 100;
@@ -11,7 +12,7 @@ const Slider = ({ label, value, setValue, min, max, step, accentColor = "teal" }
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium uppercase tracking-[0.18em] text-[#6C7378]">{label}</span>
         <span className={`${labelColor} font-mono font-semibold text-sm tabular-nums`}>
-          {Number.isInteger(step) ? value.toFixed(0) : value.toFixed(1)}
+          {isInteger(step) ? value.toFixed(0) : value.toFixed(1)}
         </span>
       </div>
 

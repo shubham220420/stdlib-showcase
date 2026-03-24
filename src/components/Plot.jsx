@@ -11,17 +11,18 @@ import {
   ReferenceLine,
 } from "recharts";
 
-import cosh from "../utils/cosh/wrapper.js";
-import coshf from "../utils/coshf/wrapper.js";
+import cosh from "../utils/cosh/index.js";
+import coshf from "../utils/coshf/index.js";
 
 const COSH_COLOR = "#1D4ED8";
 const COSHF_COLOR = "#D97706";
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload || !payload.length) return null;
+  const labelValue = parseFloat(label);
   return (
     <div className="rounded-[10px] border border-[#E0E0E0] bg-white px-4 py-3 text-xs font-mono shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
-      <p className="mb-2 text-[#6C7378]">x = <span className="font-semibold text-[#2C2E2F]">{Number(label).toFixed(3)}</span></p>
+      <p className="mb-2 text-[#6C7378]">x = <span className="font-semibold text-[#2C2E2F]">{labelValue.toFixed(3)}</span></p>
       {payload.map((entry) => (
         <div key={entry.dataKey} className="flex items-center gap-2 mb-1">
           <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
@@ -35,9 +36,13 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-const Plot = ({ yMin, yMax, xRange, step = 0.1, showCosh = true, showCoshf = true }) => {
+const Plot = ({ yMin, yMax, xValue, step = 0.1, showCosh = true, showCoshf = true }) => {
+  const xMin = 0;
+  const xMax = Math.max(1, xValue);
   const chartData = [];
-  for (let x = xRange[0]; x <= xRange[1]; x = parseFloat((x + step).toFixed(10))) {
+  const pointCount = Math.round((xMax - xMin) / step);
+  for (let i = 0; i <= pointCount; i++) {
+    const x = parseFloat((xMin + (i * step)).toFixed(2));
     let yCosh = null;
     let yCoshf = null;
 
@@ -56,7 +61,7 @@ const Plot = ({ yMin, yMax, xRange, step = 0.1, showCosh = true, showCoshf = tru
     if (yCosh !== null && (yCosh > yMax || !isFinite(yCosh))) yCosh = null;
     if (yCoshf !== null && (yCoshf > yMax || !isFinite(yCoshf))) yCoshf = null;
 
-    chartData.push({ x: parseFloat(x.toFixed(2)), cosh: yCosh, coshf: yCoshf });
+    chartData.push({ x, cosh: yCosh, coshf: yCoshf });
   }
 
   const gridColor = "#E7ECF2";
@@ -83,7 +88,7 @@ const Plot = ({ yMin, yMax, xRange, step = 0.1, showCosh = true, showCoshf = tru
           <XAxis
             dataKey="x"
             type="number"
-            domain={[xRange[0], xRange[1]]}
+            domain={[xMin, xMax]}
             axisLine={{ stroke: axisColor }}
             tickLine={{ stroke: axisColor }}
             tick={tickStyle}
@@ -101,6 +106,7 @@ const Plot = ({ yMin, yMax, xRange, step = 0.1, showCosh = true, showCoshf = tru
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: "#D5DEE8", strokeWidth: 1, strokeDasharray: "4 4" }} />
 
           <ReferenceLine x={0} stroke={axisColor} strokeWidth={1} />
+          <ReferenceLine x={xValue} stroke="#0EA5E9" strokeWidth={1.5} strokeDasharray="5 4" />
           <ReferenceLine y={1} stroke={axisColor} strokeWidth={1} strokeDasharray="4 4" />
 
           {showCosh && (
@@ -111,7 +117,7 @@ const Plot = ({ yMin, yMax, xRange, step = 0.1, showCosh = true, showCoshf = tru
               stroke={COSH_COLOR}
               strokeWidth={2.25}
               fill="url(#coshFill)"
-              dot={false}
+              dot={{ r: 3.4, fill: COSH_COLOR, stroke: "#ffffff", strokeWidth: 0.8 }}
               activeDot={{ r: 5, fill: COSH_COLOR, stroke: "#ffffff", strokeWidth: 2 }}
               connectNulls={false}
             />
@@ -124,7 +130,7 @@ const Plot = ({ yMin, yMax, xRange, step = 0.1, showCosh = true, showCoshf = tru
               stroke={COSHF_COLOR}
               strokeWidth={2.25}
               strokeDasharray="6 3"
-              dot={false}
+              dot={{ r: 3.4, fill: COSHF_COLOR, stroke: "#ffffff", strokeWidth: 0.8 }}
               activeDot={{ r: 5, fill: COSHF_COLOR, stroke: "#ffffff", strokeWidth: 2 }}
               connectNulls={false}
             />
