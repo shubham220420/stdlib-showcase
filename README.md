@@ -2,6 +2,8 @@
 
 An interactive visualization comparing double-precision `cosh` and single-precision `coshf` from [@stdlib/math/base/special](https://github.com/stdlib-js/stdlib/tree/develop/lib/node_modules/%40stdlib/math/base/special).
 
+This showcase highlights the implementation of `coshf`, which I contributed to stdlib, and explores precision differences between single and double precision computations.
+
 ---
 
 ## Functions
