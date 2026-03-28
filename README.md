@@ -80,7 +80,7 @@ The site now includes a dedicated `stdlib Traffic` view for `stdlib-js/stdlib`.
 - **Contributors**: unique commit contributors active during the selected rolling window
 - **Pull requests**: PRs opened during the selected rolling window
 - **Issues**: issues opened during the selected rolling window
-- **Contributor details**: profile, company, location, followers, public repositories, commit totals, additions, deletions, and last active week
+- **Contributor details**: profile, company, location, followers, public repositories, commit totals.
 
 The traffic view supports both preset windows (`1 week`, `1 month`, `3 months`, `6 months`) and a custom start/end date filter.
 
