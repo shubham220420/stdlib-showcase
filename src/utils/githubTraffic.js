@@ -1,4 +1,5 @@
 import isNaNNumber from "@stdlib/math/base/assert/is-nan";
+import max from "@stdlib/math/base/special/max";
 
 const GITHUB_API_BASE = "https://api.github.com";
 const GITHUB_API_VERSION = "2022-11-28";
@@ -254,7 +255,7 @@ function calculateContributorActivity(contributorStats, range) {
           return {
             commits: summary.commits + week.c,
             activeWeeks: summary.activeWeeks + 1,
-            lastActiveWeek: Math.max(summary.lastActiveWeek, weekStart),
+            lastActiveWeek: max(summary.lastActiveWeek, weekStart),
           };
         },
         {

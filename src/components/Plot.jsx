@@ -13,6 +13,7 @@ import {
 
 import cosh from "../utils/cosh/index.js";
 import coshf from "../utils/coshf/index.js";
+import round from "@stdlib/math/base/special/round";
 
 const COSH_COLOR = "#1D4ED8";
 const COSHF_COLOR = "#D97706";
@@ -36,11 +37,9 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-const Plot = ({ yMin, yMax, xValue, step = 0.1, showCosh = true, showCoshf = true }) => {
-  const xMin = 0;
-  const xMax = Math.max(1, xValue);
+const Plot = ({ yMin, yMax, xValue, xMin = 0, xMax = 10, step = 0.1, showCosh = true, showCoshf = true }) => {
   const chartData = [];
-  const pointCount = Math.round((xMax - xMin) / step);
+  const pointCount = round((xMax - xMin) / step);
   for (let i = 0; i <= pointCount; i++) {
     const x = parseFloat((xMin + (i * step)).toFixed(2));
     let yCosh = null;
@@ -89,6 +88,7 @@ const Plot = ({ yMin, yMax, xValue, step = 0.1, showCosh = true, showCoshf = tru
             dataKey="x"
             type="number"
             domain={[xMin, xMax]}
+            ticks={[xMin, (xMin + xMax) / 2, xMax]}
             axisLine={{ stroke: axisColor }}
             tickLine={{ stroke: axisColor }}
             tick={tickStyle}
@@ -105,8 +105,8 @@ const Plot = ({ yMin, yMax, xValue, step = 0.1, showCosh = true, showCoshf = tru
 
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: "#D5DEE8", strokeWidth: 1, strokeDasharray: "4 4" }} />
 
-          <ReferenceLine x={0} stroke={axisColor} strokeWidth={1} />
-          <ReferenceLine x={xValue} stroke="#0EA5E9" strokeWidth={1.5} strokeDasharray="5 4" />
+          {xMin <= 0 && xMax >= 0 && <ReferenceLine x={0} stroke={axisColor} strokeWidth={1} />}
+          {xMin <= xValue && xMax >= xValue && <ReferenceLine x={xValue} stroke="#000000" strokeWidth={2} strokeDasharray="2 2" />}
           <ReferenceLine y={1} stroke={axisColor} strokeWidth={1} strokeDasharray="4 4" />
 
           {showCosh && (
